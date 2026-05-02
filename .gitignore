@@ -24,3 +24,4 @@ v2/data/cache/signals_batch/
 v2/data/cache/ic_batch/
 v2/data/cache/correlation/
 v2/data/cache/backtest_batch/
+v2/data/cache/diagnostic/
