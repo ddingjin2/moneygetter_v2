@@ -1,6 +1,22 @@
 # PR-7 Session Memory
 
-Updated: 2026-04-25 KST
+Updated: 2026-05-03 KST
+
+## Standard Step Entry Gate
+
+Apply this common preflight check before entering every PR-7 Step:
+
+1. Run `pwd`.
+2. Run `git branch`.
+3. Run `git status --porcelain`.
+   - If any `M` line exists, stop.
+   - `??` lines are allowed only in these cases:
+     - Files intentionally left uncommitted by the current Step, explicitly named in the Step prompt.
+     - New `v2/reports/pr7_*.md` reports from a previous Step where the commit was missed immediately before this Step.
+   - If any `??` line falls outside those two categories, stop.
+4. Confirm previous Step artifacts as explicitly listed by the current Step prompt.
+
+This standard gate supersedes older ad hoc assumptions that every Step must start with zero `??` lines.
 
 ## Latest Durable State
 
