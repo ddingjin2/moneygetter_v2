@@ -14,3 +14,7 @@ v2/data/cache/price_market_cap_full/
 v2/data/cache/signals/
 v2/data/cache/returns/
 v2/data/cache/ic/
+
+# PR-7.A.2.a Option A backtest caches (Step 7)
+v2/data/cache/benchmarks/
+v2/data/cache/backtest/
