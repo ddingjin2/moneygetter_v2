@@ -22,3 +22,4 @@ v2/data/cache/backtest/
 # PR-7.A.X hypothesis batch computed caches (Step 8)
 v2/data/cache/signals_batch/
 v2/data/cache/ic_batch/
+v2/data/cache/correlation/
