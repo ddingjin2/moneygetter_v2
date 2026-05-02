@@ -6,3 +6,6 @@ pytest-cache-files-*/
 __pycache__/
 *.py[cod]
 
+# PR-7.A.2.a Option A investor flow caches (large parquet directories)
+v2/data/cache/investor_flow_full/
+v2/data/cache/price_market_cap_full/
