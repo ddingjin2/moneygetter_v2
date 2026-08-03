@@ -57,11 +57,13 @@ def _ret(close: pd.Series, periods: int) -> pd.Series:
 
 
 def _dvol(ohlcv: pd.DataFrame) -> pd.Series:
-    if "trading_value" in ohlcv.columns:
-        return pd.to_numeric(ohlcv["trading_value"], errors="coerce").astype("float64")
-    return pd.to_numeric(ohlcv["close"], errors="coerce").astype("float64") * pd.to_numeric(
+    fallback = pd.to_numeric(ohlcv["close"], errors="coerce").astype("float64") * pd.to_numeric(
         ohlcv["volume"], errors="coerce"
     ).astype("float64")
+    if "trading_value" not in ohlcv.columns:
+        return fallback
+    trading_value = pd.to_numeric(ohlcv["trading_value"], errors="coerce").astype("float64")
+    return trading_value.fillna(fallback)
 
 
 def _flow_total(flow: pd.DataFrame) -> pd.Series:

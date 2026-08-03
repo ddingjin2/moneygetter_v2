@@ -1,0 +1,57 @@
+{
+  "strategy": "A4_60_20d_top10",
+  "start": "2026-04-17",
+  "end": "2026-07-14",
+  "initial_capital": 10000000.0,
+  "rebalance_dates": [
+    "2026-06-02",
+    "2026-07-01"
+  ],
+  "rebalance_summaries": [
+    {
+      "date": "2026-06-02",
+      "rank_count": 782,
+      "target_count": 77,
+      "sell_orders_filled": 18,
+      "buy_orders_filled": 59,
+      "sell_gross": 2741781.0,
+      "buy_gross": 2754505.0,
+      "fees": 5496.286,
+      "cash_after": 538191.5599999956,
+      "positions_after": 77
+    },
+    {
+      "date": "2026-07-01",
+      "rank_count": 779,
+      "target_count": 76,
+      "sell_orders_filled": 22,
+      "buy_orders_filled": 52,
+      "sell_gross": 1992701.0,
+      "buy_gross": 2352063.0,
+      "fees": 4344.764,
+      "cash_after": 216250.98799999474,
+      "positions_after": 76
+    }
+  ],
+  "delisting": {
+    "count": 1,
+    "codes": [
+      "008500"
+    ],
+    "cash_flow": 41766.192,
+    "cash_after": 579957.7519999957,
+    "positions_after": 76
+  },
+  "ending_cash": 216250.98799999474,
+  "ending_market_value": 10000825.0,
+  "ending_equity": 10217075.987999994,
+  "cum_return": 0.021707598799999506,
+  "positions": 76,
+  "missing_latest_prices": [],
+  "replay_trade_rows": 152,
+  "incremental_fees": 9882.858,
+  "current_no_rebalance_equity": 9714620.389999997,
+  "current_no_rebalance_return": -0.028537961000000278,
+  "equity_difference_vs_current": 502455.59799999744,
+  "return_difference_pct_points": 5.024555979999974
+}

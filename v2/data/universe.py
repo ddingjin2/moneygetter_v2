@@ -4,6 +4,12 @@ from pathlib import Path
 
 import pandas as pd
 
+from v2.data.delistings import (
+    DEFAULT_DELISTING_REGISTRY_PATH,
+    apply_delisting_registry,
+    load_delisting_registry,
+)
+
 
 DEFAULT_KOSPI_UNIVERSE_PATH = Path(__file__).resolve().parents[1] / "data/cache/universe/kospi_universe.parquet"
 
@@ -40,14 +46,17 @@ def filter_nonmicrocap(
 
 def load_kospi_universe(
     path: str | Path = DEFAULT_KOSPI_UNIVERSE_PATH,
+    *,
+    registry_path: str | Path = DEFAULT_DELISTING_REGISTRY_PATH,
 ) -> pd.DataFrame:
-    """Load the PR-7.A.2.a KOSPI common-stock universe index."""
+    """Load the KOSPI universe and apply verified delisting overrides."""
 
     frame = pd.read_parquet(path).copy()
     for column in ("listed_date", "delisted_date"):
         if column in frame.columns:
             frame[column] = pd.to_datetime(frame[column], errors="coerce")
     frame["code"] = frame["code"].astype(str).str.zfill(6)
+    frame = apply_delisting_registry(frame, load_delisting_registry(registry_path))
     return frame.sort_values("code").reset_index(drop=True)
 
 

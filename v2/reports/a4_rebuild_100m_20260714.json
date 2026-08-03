@@ -1,0 +1,62 @@
+{
+  "start": "2026-04-17",
+  "end": "2026-07-14",
+  "capital": 100000000.0,
+  "rebalance_dates": [
+    "2026-06-02",
+    "2026-07-01"
+  ],
+  "summaries": [
+    {
+      "event": "INITIAL",
+      "date": "2026-04-17",
+      "target_notional": 100000000.0,
+      "rank_count": 765,
+      "target_count": 76,
+      "sell_fills": 0,
+      "buy_fills": 76,
+      "fees": 99392.638,
+      "cash_after": 507969.36199998343,
+      "positions_after": 76,
+      "skipped_codes": []
+    },
+    {
+      "event": "REBALANCE_20D",
+      "date": "2026-06-02",
+      "target_notional": 99110303.36199999,
+      "rank_count": 782,
+      "target_count": 78,
+      "sell_fills": 19,
+      "buy_fills": 68,
+      "fees": 55741.662000000004,
+      "cash_after": 443807.6999999813,
+      "positions_after": 78,
+      "skipped_codes": []
+    },
+    {
+      "event": "REBALANCE_20D",
+      "date": "2026-07-01",
+      "target_notional": 95812936.86799999,
+      "rank_count": 779,
+      "target_count": 77,
+      "sell_fills": 37,
+      "buy_fills": 51,
+      "fees": 42172.793,
+      "cash_after": 657511.0749999839,
+      "positions_after": 77,
+      "skipped_codes": []
+    }
+  ],
+  "ending_cash": 657511.0749999839,
+  "ending_market_value": 100756090.0,
+  "ending_equity": 101413601.07499999,
+  "cum_return": 0.014136010749999928,
+  "positions": 77,
+  "trades": 252,
+  "fees": 197723.92500000002,
+  "missing_latest_prices": [],
+  "hynix_trade_count": 0,
+  "hynix_trades": [],
+  "hynix_final_position": [],
+  "output_dir": "v2\\data\\cache\\paper_trading\\a4_100m_rebuild_20260714"
+}

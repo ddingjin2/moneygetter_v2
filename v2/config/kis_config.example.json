@@ -1,0 +1,14 @@
+{
+  "env": {
+    "KIS_MODE": "paper",
+    "KIS_APP_KEY": "<issued app key>",
+    "KIS_APP_SECRET": "<issued app secret>",
+    "KIS_ACCOUNT_NO": "<8 digit account number before dash>",
+    "KIS_PRODUCT_CODE": "01"
+  },
+  "notes": [
+    "Prefer env vars or a local untracked .env file; do not commit secrets.",
+    "Order submission is intentionally not implemented yet.",
+    "First verify token, quote, and balance against KIS paper account."
+  ]
+}

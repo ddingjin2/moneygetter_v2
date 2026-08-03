@@ -1,0 +1,25 @@
+{
+  "market": "US",
+  "universe_key": "nasdaq100",
+  "start": "2020-01-01",
+  "end": null,
+  "provider": "yfinance_nasdaq100",
+  "provider_settings": {
+    "universe_url": "https://en.wikipedia.org/wiki/Nasdaq-100",
+    "batch_size": 60,
+    "pause_seconds": 0.2
+  },
+  "universe": {
+    "security_types": ["common_stock"],
+    "exchanges": ["NASDAQ"],
+    "min_median_dollar_volume_60d": 1000000,
+    "min_price": 2.0
+  },
+  "benchmark": {
+    "symbol": "QQQ"
+  },
+  "costs": {
+    "long_only_bps": [5, 10, 20, 30],
+    "long_short_bps": [10, 20, 30, 50]
+  }
+}

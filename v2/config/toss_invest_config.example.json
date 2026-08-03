@@ -1,0 +1,15 @@
+{
+  "env": {
+    "TOSS_INVEST_MODE": "disabled",
+    "TOSS_INVEST_APP_KEY": "<issued app key>",
+    "TOSS_INVEST_APP_SECRET": "<issued app secret>",
+    "TOSS_INVEST_ACCOUNT_NO": "<account identifier if required by official docs>",
+    "TOSS_INVEST_OPENAPI_DOCUMENT_URL": "https://openapi.tossinvest.com/openapi-docs/latest/openapi.json",
+    "TOSS_INVEST_ENABLE_LIVE_ORDERS": "false"
+  },
+  "notes": [
+    "Prefer env vars or a local untracked .env file; do not commit secrets.",
+    "Live order submission is intentionally blocked in scripts/toss_invest_client.py.",
+    "Fetch and review the official OpenAPI spec before adding any submit endpoint."
+  ]
+}

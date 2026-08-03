@@ -17,10 +17,11 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from v2.data.ohlcv import load_ohlcv  # noqa: E402
+from v2.data.universe import load_kospi_universe  # noqa: E402
 
 
 REQUEST_START = pd.Timestamp("2020-03-27")
-REQUEST_END = pd.Timestamp("2026-04-17")
+REQUEST_END = pd.Timestamp("2026-12-31")
 UNIVERSE_PATH = ROOT / "v2/data/cache/universe/kospi_universe.parquet"
 KOSPI_CALENDAR_PATH = ROOT / "v2/data/cache/kospi_daily.parquet"
 MINI_PRICE_DIR = ROOT / "v2/data/cache/prices_mini_pilot"
@@ -74,8 +75,7 @@ def atomic_write_text(text: str, path: Path) -> None:
 
 
 def load_universe() -> pd.DataFrame:
-    frame = pd.read_parquet(UNIVERSE_PATH)
-    frame["code"] = frame["code"].astype(str).str.zfill(6)
+    frame = load_kospi_universe(UNIVERSE_PATH)
     frame["listed_date"] = pd.to_datetime(frame["listed_date"], errors="coerce").dt.normalize()
     frame["delisted_date"] = pd.to_datetime(frame["delisted_date"], errors="coerce").dt.normalize()
     frame["sector"] = frame["sector"].fillna("unknown")
@@ -131,12 +131,15 @@ def prepare_full_cache() -> dict[str, Any]:
     universe = load_universe()
     calendar = load_trading_calendar()
     ohlcv = normalize_ohlcv()
+    data_end = pd.to_datetime(ohlcv["date"], errors="coerce").max().normalize()
+    effective_end = min(REQUEST_END, pd.Timestamp(data_end)) if not pd.isna(data_end) else REQUEST_END
     grouped = {code: frame.copy() for code, frame in ohlcv.groupby("symbol", sort=False)}
 
     log_rows: list[dict[str, Any]] = []
     for row in universe.itertuples(index=False):
         code = str(row.code).zfill(6)
         start, end = window_for_row(row)
+        end = min(end, effective_end)
         expected = expected_days(calendar, start, end)
         frame = grouped.get(code, pd.DataFrame(columns=OUTPUT_COLUMNS)).copy()
         frame = frame.loc[frame["date"].between(start, end)].sort_values("date").reset_index(drop=True)
@@ -169,7 +172,8 @@ def prepare_full_cache() -> dict[str, Any]:
         "started_at": started.isoformat(),
         "finished_at": finished.isoformat(),
         "elapsed_seconds": float((finished - started).total_seconds()),
-        "source": "C:/dev/moneygetter/data/processed/market_ohlcv.parquet via v2.data.ohlcv.load_ohlcv",
+        "effective_end": effective_end.date().isoformat(),
+        "source": "v2/data/processed/market_ohlcv.parquet via v2.data.ohlcv.load_ohlcv",
         "pykrx_market_cap_probe": probe_pykrx_market_cap(),
     }
     atomic_write_text(json.dumps(meta, ensure_ascii=False, indent=2) + "\n", META_PATH)
@@ -326,7 +330,7 @@ def write_report(meta: dict[str, Any] | None = None) -> None:
         "",
         "## Source",
         f"- Local OHLCV: `{meta.get('source', 'NA')}`",
-        "- Date window: `2020-03-27 ~ 2026-04-17`, intersected with each stock's universe active window.",
+        f"- Date window: `{REQUEST_START.date().isoformat()} ~ {meta.get('effective_end', REQUEST_END.date().isoformat())}`, intersected with each stock's universe active window.",
         "",
         "## Market-cap Availability",
         "- Local OHLCV `market_cap` is present but all values are zero for this universe window.",

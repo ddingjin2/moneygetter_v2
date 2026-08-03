@@ -1,50 +1,28 @@
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 import pandas as pd
 
+from v2.data.market_dataset import load_ohlcv as load_v2_ohlcv
 
 DEFAULT_V1_ROOT = Path("C:/dev/moneygetter")
 DEFAULT_V1_OHLCV_PATH = Path("data/processed/market_ohlcv.parquet")
 
 
-def resolve_v1_root(v1_root: str | Path | None = None) -> Path:
-    """Resolve the read-only v1 project root used for shared market data."""
+def load_ohlcv(path: str | Path | None = None, *, v1_root: str | Path | None = None) -> pd.DataFrame:
+    """Load canonical v2 OHLCV data by default.
 
-    configured = v1_root or os.environ.get("MONEYGETTER_V1_ROOT")
-    return Path(configured) if configured else DEFAULT_V1_ROOT
-
-
-def load_ohlcv(
-    path: str | Path | None = None,
-    *,
-    v1_root: str | Path | None = None,
-) -> pd.DataFrame:
-    """Load OHLCV data from a v2 path or the read-only v1 data location.
-
-    This wrapper intentionally does not mutate or import v1 strategy code. It
-    only reads a tabular OHLCV file so v2 can share the established data store.
+    The v1 root argument is kept for old callers but is no longer used unless a
+    concrete path is passed explicitly. v2 standalone operation should read
+    `v2/data/processed/market_ohlcv.parquet`.
     """
 
-    source = Path(path) if path is not None else resolve_v1_root(v1_root) / DEFAULT_V1_OHLCV_PATH
-    if not source.exists():
-        raise FileNotFoundError(source)
+    if v1_root is not None and path is None:
+        path = Path(v1_root).expanduser() / DEFAULT_V1_OHLCV_PATH
+    return load_v2_ohlcv(path)
 
-    suffix = source.suffix.lower()
-    if suffix == ".parquet":
-        frame = pd.read_parquet(source)
-    elif suffix == ".csv":
-        frame = pd.read_csv(source)
-    else:
-        raise ValueError(f"Unsupported OHLCV file format: {source.suffix}")
 
-    if "date" in frame.columns:
-        frame = frame.copy()
-        frame["date"] = pd.to_datetime(frame["date"])
-    if "symbol" not in frame.columns and "ticker" in frame.columns:
-        frame = frame.copy()
-        frame["symbol"] = frame["ticker"].astype(str)
-    return frame
-
+def load_ohlcv_from_v1_legacy(v1_root: str | Path | None = None) -> pd.DataFrame:
+    root = Path(v1_root).expanduser() if v1_root is not None else DEFAULT_V1_ROOT
+    return load_v2_ohlcv(root / DEFAULT_V1_OHLCV_PATH)

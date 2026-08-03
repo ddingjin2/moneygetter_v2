@@ -5,6 +5,7 @@
 pytest-cache-files-*/
 __pycache__/
 *.py[cod]
+.venv/
 
 # PR-7.A.2.a Option A investor flow caches (large parquet directories)
 v2/data/cache/investor_flow_full/
@@ -18,6 +19,17 @@ v2/data/cache/ic/
 # PR-7.A.2.a Option A backtest caches (Step 7)
 v2/data/cache/benchmarks/
 v2/data/cache/backtest/
+
+# Exploration/research caches, processed panels, paper trading runtime state (large or mutating)
+v2/data/cache/a4_plus_explore/
+v2/data/cache/a4_risk_overlay/
+v2/data/cache/a4_ta_filter/
+v2/data/cache/intraday_flat_explore/
+v2/data/cache/lit_factor_explore/
+v2/data/cache/paper_trading/
+v2/data/cache/ta_explore/
+v2/data/cache/us/
+v2/data/processed/
 
 # PR-7.A.X hypothesis batch computed caches (Step 8)
 v2/data/cache/signals_batch/
