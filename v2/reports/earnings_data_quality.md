@@ -1,12 +1,12 @@
 # Earnings Data Quality
 
-Records: 22441
-Date range: 2019-02-14 to 2026-03-31
+Records: 24040
+Date range: 2019-02-14 to 2026-08-28
 
 ## KOSPI Coverage
 | reference_year | kospi_symbols_expected | covered_symbols | coverage | passes_70pct_gate |
 | --- | --- | --- | --- | --- |
-| 2026 | 2199 | 804 | 0.3656 | False |
+| 2026 | 2199 | 811 | 0.3688 | False |
 
 ## Annual Filing Counts
 | year | covered_symbols | mean | median | min | max |
@@ -18,7 +18,7 @@ Date range: 2019-02-14 to 2026-03-31
 | 2023 | 797 | 3.9260 | 4.0000 | 1 | 4 |
 | 2024 | 807 | 3.9281 | 4.0000 | 1 | 4 |
 | 2025 | 815 | 3.9460 | 4.0000 | 1 | 4 |
-| 2026 | 804 | 1.0000 | 1.0000 | 1 | 1 |
+| 2026 | 811 | 2.9630 | 3.0000 | 1 | 3 |
 
 ## Missing Rates By Receipt Year
 | year | records | revenue_missing_rate | operating_income_missing_rate | net_income_missing_rate | total_assets_missing_rate | total_equity_missing_rate |
@@ -30,13 +30,13 @@ Date range: 2019-02-14 to 2026-03-31
 | 2023 | 3129 | 0.0837 | 0.0729 | 0.1585 | 0.0451 | 0.0802 |
 | 2024 | 3170 | 0.0634 | 0.0432 | 0.1435 | 0.0013 | 0.0047 |
 | 2025 | 3216 | 0.0650 | 0.0501 | 0.1704 | 0.0096 | 0.0103 |
-| 2026 | 804 | 0.0622 | 0.0435 | 0.0560 | 0.0137 | 0.0100 |
+| 2026 | 2403 | 0.3891 | 0.3275 | 0.3966 | 0.3109 | 0.3063 |
 
 ## Receipt Time Distribution
 | bucket | records | share |
 | --- | --- | --- |
 | before_15_30 | 0 | 0.0000 |
-| after_or_at_15_30 | 22441 | 1.0000 |
+| after_or_at_15_30 | 24040 | 1.0000 |
 | missing_time | 0 | 0.0000 |
 
 ## Leakage Precheck

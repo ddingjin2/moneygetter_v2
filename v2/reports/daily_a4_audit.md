@@ -1,13 +1,13 @@
 # Daily A4 audit
 
-- generated_at: 2026-08-04T01:10:49.758196+09:00
-- status: **pass**
-- processed_max_date: 2026-08-03
-- v2_latest_date: 2026-08-03
+- generated_at: 2026-09-17T21:04:45.900062+09:00
+- status: **warning**
+- processed_max_date: 2026-09-17
+- v2_latest_date: 2026-09-17
 - positions: 77
-- equity_recomputed: 104082079.206
+- equity_recomputed: 115388579.721
 - rebalance_due: False
-- elapsed_trading_days: 0
+- elapsed_trading_days: 12
 
 ## Checks
 
@@ -23,13 +23,13 @@
 | OK | warning | `equity_curve_reconciles` | latest equity curve row reconciles with current prices |
 | OK | error | `all_positions_priced` | all open positions have latest prices |
 | OK | warning | `cron_log_exists` | latest after-close cron log exists |
-| OK | warning | `cron_log_clean` | latest cron log tail has no obvious error words |
+| FAIL | warning | `cron_log_clean` | latest cron log tail has no obvious error words |
 
 ## Key reconciliation
 
-- cash: 426464.206
-- expected_cash_from_trades: 426464.206
+- cash: 510071.721
+- expected_cash_from_trades: 510071.721
 - cash_diff_vs_trades: -0.000000
-- market_value_recomputed: 103655615.000
+- market_value_recomputed: 114878508.000
 - equity_diff_vs_curve: 0.000000
 

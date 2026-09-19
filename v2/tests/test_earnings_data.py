@@ -4,6 +4,7 @@ import math
 
 import pandas as pd
 
+from v2.data import earnings
 from v2.data.earnings import (
     calculate_tradable_entry_date,
     compute_sue,
@@ -38,6 +39,19 @@ def test_tradable_entry_date_weekend_disclosure_uses_next_business_day() -> None
 
 def test_tradable_entry_date_skips_missing_holiday_in_calendar() -> None:
     assert calculate_tradable_entry_date("2024-05-14", "16:00", _calendar()) == pd.Timestamp("2024-05-16")
+
+
+def test_latest_day_filings_wait_until_next_trading_day_is_known() -> None:
+    filings = pd.DataFrame(
+        {
+            "rcept_dt": pd.to_datetime(["2024-05-17", "2024-05-20"]),
+            "rcept_no": ["known", "pending"],
+        }
+    )
+
+    result = earnings.filter_filings_with_known_entry_day(filings, _calendar())
+
+    assert result["rcept_no"].tolist() == ["known"]
 
 
 def test_compute_sue_matches_manual_yoy_eps_formula() -> None:

@@ -487,6 +487,20 @@ def calculate_tradable_entry_date(
     return next_trading_day(rcept_dt, trading_calendar)
 
 
+def filter_filings_with_known_entry_day(
+    filings: pd.DataFrame,
+    trading_calendar: Sequence[pd.Timestamp],
+) -> pd.DataFrame:
+    """Defer filings until their next KRX trading day exists in the price data."""
+
+    if filings.empty or not trading_calendar:
+        return filings.iloc[0:0].copy()
+    latest_trading_day = max(pd.Timestamp(value).normalize() for value in trading_calendar)
+    frame = filings.copy()
+    frame["rcept_dt"] = pd.to_datetime(frame["rcept_dt"]).dt.normalize()
+    return frame.loc[frame["rcept_dt"].lt(latest_trading_day)].reset_index(drop=True)
+
+
 def add_yoy_fields(events: pd.DataFrame) -> pd.DataFrame:
     if events.empty:
         return events.copy()
@@ -587,6 +601,7 @@ def build_earnings_events(
         how="inner",
     )
     trading_calendar = load_trading_calendar(ohlcv_path=ohlcv_path)
+    filings = filter_filings_with_known_entry_day(filings, trading_calendar)
 
     existing = pd.DataFrame()
     if checkpoint_path.exists():

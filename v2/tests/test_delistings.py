@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import sys
+import threading
+from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -11,7 +13,13 @@ from v2.scripts.paper_account_a4 import DEFAULT_CAPITAL as ACCOUNT_DEFAULT_CAPIT
 from v2.scripts.paper_account_a4 import build_paper_trade_command, calculate_account_equity
 from v2.scripts.paper_trade_a4 import DEFAULT_CAPITAL as TRADE_DEFAULT_CAPITAL
 from v2.scripts.paper_trade_a4 import build_a4_rank
-from v2.scripts.run_after_close_a4 import PYTHON_EXECUTABLE, build_data_update_commands
+from v2.scripts.run_after_close_a4 import (
+    PYTHON_EXECUTABLE,
+    build_data_update_commands,
+    build_financial_update_commands,
+    build_shadow_command,
+    run_parallel_update_lanes,
+)
 from v2.scripts.update_market_dataset_v2 import load_universe_records
 
 
@@ -85,7 +93,87 @@ def test_after_close_runner_updates_kospi_benchmark_with_market_data() -> None:
         [PYTHON_EXECUTABLE, "scripts/update_market_dataset_v2.py"],
         [PYTHON_EXECUTABLE, "scripts/update_kospi_benchmark.py"],
         [PYTHON_EXECUTABLE, "scripts/prepare_price_market_cap_full.py"],
+        [PYTHON_EXECUTABLE, "scripts/refresh_a4_signal.py"],
     ]
+
+
+def test_after_close_runner_builds_financial_update_and_shadow_commands() -> None:
+    commands = build_financial_update_commands("2026-08-30")
+
+    assert commands == [
+        [
+            PYTHON_EXECUTABLE,
+            "scripts/build_earnings_dataset.py",
+            "--start-date",
+            "2019-01-01",
+            "--end-date",
+            "2026-08-30",
+            "--ohlcv-path",
+            "data/processed/market_ohlcv.parquet",
+            "--output",
+            "data/cache/earnings_events.parquet",
+            "--checkpoint",
+            "data/cache/earnings_events_partial.parquet",
+            "--checkpoint-every",
+            "100",
+            "--max-workers",
+            "4",
+        ],
+        [
+            PYTHON_EXECUTABLE,
+            "scripts/validate_earnings_data.py",
+            "--earnings-path",
+            "data/cache/earnings_events.parquet",
+            "--ohlcv-path",
+            "data/processed/market_ohlcv.parquet",
+            "--output",
+            "reports/earnings_data_quality.md",
+        ],
+    ]
+    assert build_shadow_command() == [
+        PYTHON_EXECUTABLE,
+        "spikes/a4_financial_multifactor.py",
+        "--run",
+    ]
+
+
+def test_after_close_update_lanes_start_in_parallel() -> None:
+    barrier = threading.Barrier(2)
+    started: list[str] = []
+
+    def fake_run(command: list[str], execute: bool, cwd: Path) -> dict:
+        started.append(command[0])
+        barrier.wait(timeout=1.0)
+        return {"cmd": command[0], "returncode": 0}
+
+    result = run_parallel_update_lanes(
+        {"market": [["market"]], "financial": [["financial"]]},
+        execute=True,
+        cwd=Path("."),
+        runner=fake_run,
+    )
+
+    assert sorted(started) == ["financial", "market"]
+    assert result["market"]["status"] == "pass"
+    assert result["financial"]["status"] == "pass"
+
+
+def test_financial_lane_failure_is_reported_without_hiding_market_success() -> None:
+    def fake_run(command: list[str], execute: bool, cwd: Path) -> dict:
+        if command[0] == "financial":
+            raise SystemExit("dart unavailable")
+        return {"cmd": command[0], "returncode": 0}
+
+    result = run_parallel_update_lanes(
+        {"market": [["market"]], "financial": [["financial"]]},
+        execute=True,
+        cwd=Path("."),
+        runner=fake_run,
+    )
+
+    assert result["market"]["status"] == "pass"
+    assert result["financial"]["status"] == "fail"
+    assert "dart unavailable" in result["financial"]["error"]
 
 
 def test_rebalance_notional_uses_current_account_equity() -> None:

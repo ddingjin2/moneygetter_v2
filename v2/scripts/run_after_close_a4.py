@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import json
 import os
 import subprocess
 import sys
 import time
+from collections.abc import Callable
 from pathlib import Path
 
 import pandas as pd
@@ -24,7 +26,45 @@ def build_data_update_commands() -> list[list[str]]:
         [PYTHON_EXECUTABLE, "scripts/update_market_dataset_v2.py"],
         [PYTHON_EXECUTABLE, "scripts/update_kospi_benchmark.py"],
         [PYTHON_EXECUTABLE, "scripts/prepare_price_market_cap_full.py"],
+        [PYTHON_EXECUTABLE, "scripts/refresh_a4_signal.py"],
     ]
+
+
+def build_financial_update_commands(asof: str) -> list[list[str]]:
+    return [
+        [
+            PYTHON_EXECUTABLE,
+            "scripts/build_earnings_dataset.py",
+            "--start-date",
+            "2019-01-01",
+            "--end-date",
+            asof,
+            "--ohlcv-path",
+            "data/processed/market_ohlcv.parquet",
+            "--output",
+            "data/cache/earnings_events.parquet",
+            "--checkpoint",
+            "data/cache/earnings_events_partial.parquet",
+            "--checkpoint-every",
+            "100",
+            "--max-workers",
+            "4",
+        ],
+        [
+            PYTHON_EXECUTABLE,
+            "scripts/validate_earnings_data.py",
+            "--earnings-path",
+            "data/cache/earnings_events.parquet",
+            "--ohlcv-path",
+            "data/processed/market_ohlcv.parquet",
+            "--output",
+            "reports/earnings_data_quality.md",
+        ],
+    ]
+
+
+def build_shadow_command() -> list[str]:
+    return [PYTHON_EXECUTABLE, "spikes/a4_financial_multifactor.py", "--run"]
 
 
 def atomic_json(data: dict, path: Path) -> None:
@@ -86,6 +126,31 @@ def run(cmd: list[str], execute: bool, cwd: Path = ROOT) -> dict:
     return {"cmd": " ".join(cmd), "cwd": str(cwd), "returncode": proc.returncode, "stdout_tail": proc.stdout[-1000:]}
 
 
+def run_parallel_update_lanes(
+    lanes: dict[str, list[list[str]]],
+    *,
+    execute: bool,
+    cwd: Path = ROOT,
+    runner: Callable[[list[str], bool, Path], dict] = run,
+) -> dict[str, dict]:
+    """Run independent update lanes concurrently and commands within each lane sequentially."""
+
+    def run_lane(commands: list[list[str]]) -> dict:
+        lane_steps: list[dict] = []
+        try:
+            for command in commands:
+                lane_steps.append(runner(command, execute, cwd))
+        except (Exception, SystemExit) as exc:
+            return {"status": "fail", "error": str(exc), "steps": lane_steps}
+        return {"status": "pass", "steps": lane_steps}
+
+    if not lanes:
+        return {}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=len(lanes)) as executor:
+        futures = {name: executor.submit(run_lane, commands) for name, commands in lanes.items()}
+        return {name: futures[name].result() for name in lanes}
+
+
 def ensure_state(interval: int, latest_date: pd.Timestamp) -> dict:
     account = read_json(ACCOUNT_DIR / "account.json", {})
     state = read_json(STATE_PATH, {})
@@ -117,7 +182,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="After-close operation runner for A4 paper trading.")
     parser.add_argument("--interval", type=int, default=DEFAULT_INTERVAL, help="Rebalance interval in trading days.")
     parser.add_argument("--dry-run", action="store_true", help="Only print what would happen.")
-    parser.add_argument("--skip-data-update", action="store_true", help="Do not run the v2 dataset update or v2 cache prepare step.")
+    parser.add_argument("--skip-data-update", action="store_true", help="Skip both market and financial update lanes.")
+    parser.add_argument("--skip-financial-update", action="store_true", help="Run the market lane only and block the financial shadow run.")
+    parser.add_argument("--skip-shadow", action="store_true", help="Do not run the A4 + financial shadow comparison.")
     parser.add_argument("--force-rebalance", action="store_true")
     parser.add_argument("--no-fill", action="store_true", help="Generate rebalance orders but do not paper-fill them.")
     parser.add_argument("--skip-audit", action="store_true", help="Do not run the daily A4 audit harness at the end.")
@@ -125,9 +192,37 @@ def main() -> None:
 
     execute = not args.dry_run
     steps = []
-    if not args.skip_data_update:
-        for command in build_data_update_commands():
-            steps.append(run(command, execute, cwd=ROOT))
+    update_asof = pd.Timestamp.now(tz="Asia/Seoul").strftime("%Y-%m-%d")
+    if args.skip_data_update:
+        parallel_updates = {
+            "market": {"status": "skipped", "steps": []},
+            "financial": {"status": "skipped", "steps": []},
+        }
+    else:
+        lanes = {"market": build_data_update_commands()}
+        if not args.skip_financial_update:
+            lanes["financial"] = build_financial_update_commands(update_asof)
+        parallel_updates = run_parallel_update_lanes(lanes, execute=execute, cwd=ROOT)
+        if args.skip_financial_update:
+            parallel_updates["financial"] = {"status": "skipped", "steps": []}
+
+    for lane in parallel_updates.values():
+        steps.extend(lane.get("steps", []))
+    if parallel_updates["market"]["status"] == "fail":
+        raise SystemExit(f"Market update lane failed; paper operations blocked.\n{parallel_updates['market']['error']}")
+
+    financial_status = parallel_updates["financial"]["status"]
+    if args.skip_shadow:
+        shadow = {"status": "skipped", "reason": "skip_shadow"}
+    elif financial_status != "pass":
+        shadow = {"status": "blocked", "reason": f"financial_update_{financial_status}"}
+    else:
+        try:
+            shadow_step = run(build_shadow_command(), execute, cwd=ROOT)
+            steps.append(shadow_step)
+            shadow = {"status": "pass", "step": shadow_step}
+        except SystemExit as exc:
+            shadow = {"status": "fail", "error": str(exc)}
 
     latest = latest_price_date()
     dates = trading_dates()
@@ -160,10 +255,20 @@ def main() -> None:
         "due": due,
         "dry_run": args.dry_run,
         "filled": bool(due and not args.no_fill and execute),
+        "parallel_updates": parallel_updates,
+        "shadow": shadow,
         "steps": steps,
     }
     if execute:
-        append_log({k: v for k, v in summary.items() if k != "steps"})
+        log_row = {
+            key: value
+            for key, value in summary.items()
+            if key not in {"steps", "parallel_updates", "shadow"}
+        }
+        log_row["market_update_status"] = parallel_updates["market"]["status"]
+        log_row["financial_update_status"] = parallel_updates["financial"]["status"]
+        log_row["shadow_status"] = shadow["status"]
+        append_log(log_row)
     print(json.dumps(summary, ensure_ascii=False, indent=2))
 
 
