@@ -87,7 +87,7 @@ def test_daily_proximity_matches_manual_rolling_high() -> None:
 
 
 def test_samsung_sample_matches_manual_52_week_high() -> None:
-    path = Path("C:/dev/moneygetter_v2/v2/data/processed/market_ohlcv.parquet")
+    path = Path("C:/dev/projects/moneygetter_v2/v2/data/processed/market_ohlcv.parquet")
     if not path.exists():
         raise AssertionError(f"missing local OHLCV fixture: {path}")
 

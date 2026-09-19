@@ -1,6 +1,6 @@
 # Moneygetter v2 — 현재 작업 인수인계
 
-역할: 이 프로젝트의 **현재 상태·blocker·다음 행동의 단일 정본**. 장기 색인은 `C:/dev/second-brain/Projects/Moneygetter.md`, 상세 운영·연구는 해당 보고서를 따른다.
+역할: 이 프로젝트의 **현재 상태·blocker·다음 행동의 단일 정본**. 장기 색인은 `C:/dev/knowledge/second-brain/Projects/Moneygetter.md`, 상세 운영·연구는 해당 보고서를 따른다.
 
 ## 현재 상태 · 2026-09-19 문서 정리 기준
 
@@ -8,7 +8,7 @@
 - 실제 branch는 문서 정리 시작 시 `option_a_investor_flow`였고 기존 코드·데이터 변경이 다수 있다. 시작 시 현재 Git 상태를 다시 확인하며 reset·일괄 덮어쓰기·임의 commit을 하지 않는다.
 - 최신 계좌 잔액·보유 종목·거래일·리밸런싱 필요 여부는 **미조회**다. 문서에 남아 있던 7월 수치나 4월 감사 PASS를 현재 상태로 인용하지 않는다.
 - 과거 Hermes cron·WSL 설정은 현재 동작이 확인되지 않았다. 과거 스케줄을 복원하거나 새 자동화를 중복 등록하지 않는다.
-- 최근 연결된 Vault 운영 기록은 `C:/dev/second-brain/Daily/2026-09-06.md`다. 이것도 당시 기록이며 현재 계좌의 증거는 아니다.
+- 최근 연결된 Vault 운영 기록은 `C:/dev/knowledge/second-brain/Daily/2026-09-06.md`다. 이것도 당시 기록이며 현재 계좌의 증거는 아니다.
 
 ## 유지할 운영 원칙
 
@@ -22,7 +22,7 @@
 
 1. 사용자의 요청이 일일 운영인지 전략 연구인지 확인한다. 이 문서의 존재만으로 실행하지 않는다.
 2. 운영 요청이면 적용 환경의 `moneygetter-daily-operations` 스킬 또는 `paper_trading_a4_operation.md`를 읽는다. 현재 원장·시장·benchmark·자동화 중복 여부를 조회한 뒤 승인된 작업만 수행한다.
-3. 손절·계좌 방어 연구 요청이면 `C:/dev/second-brain/Daily/2026-07-20.md`의 승인 조건과 실제 후속 구현을 확인한다. 기존 보유분 즉시 적용과 다음 리밸런싱 적용을 임의 결정하지 않는다.
+3. 손절·계좌 방어 연구 요청이면 `C:/dev/knowledge/second-brain/Daily/2026-07-20.md`의 승인 조건과 실제 후속 구현을 확인한다. 기존 보유분 즉시 적용과 다음 리밸런싱 적용을 임의 결정하지 않는다.
 4. 연구 요청이면 해당 전략의 보고서·코드·기준 데이터만 확인한다. 과거 자동 메모리의 FIRE·QLD·TA11 TODO나 verdict를 현재 실행 승인으로 사용하지 않는다.
 
 ## 정본 위치

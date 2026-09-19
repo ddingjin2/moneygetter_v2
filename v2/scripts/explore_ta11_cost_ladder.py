@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-ROOT = Path(r"C:\dev\moneygetter_v2")
+ROOT = Path(r"C:\dev\projects\moneygetter_v2")
 sys.path.insert(0, str(ROOT / "v2/scripts"))
 sys.path.insert(0, str(ROOT))
 from explore_ta_signals import build_signals, cs_zscore, eligibility, forward_returns, load_panel, TRAIN_END

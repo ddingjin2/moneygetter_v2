@@ -72,7 +72,7 @@
 | gate_known_loss | 0.2299 | 0.0422 | -0.1769 | 101121280.7196 | -0.5146 | 50.1818 | 110 |
 | score75_gate_loss | 0.4800 | 0.1099 | -0.1888 | 103765934.4866 | -0.4469 | 56.5455 | 110 |
 
-- 일별 shadow snapshot: `C:\dev\moneygetter_v2\v2\data\cache\a4_financial_multifactor_spike\shadow_history.parquet`
+- 일별 shadow snapshot: `C:\dev\projects\moneygetter_v2\v2\data\cache\a4_financial_multifactor_spike\shadow_history.parquet`
 - 동일 거래일 재실행은 `(market_date, variant)` 키로 덮어써 중복하지 않는다.
 
 ### Recommendation for the real build
